@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--    测试别名-->
+    <alias name="user" alias="u"></alias>
+    <bean class="org.sean.bean.User" id="user"></bean>
+
+    <!--    依赖注入-->
+    <!--    基于setter setId->id setUserName->userName-->
+    <bean class="org.sean.bean.User" id="user2">
+        <property name="id" value="1"></property>
+        <property name="userName" value="sean"></property>
+    </bean>
+
+    <!--    基于构造函数的依赖注入-->
+    <bean class="org.sean.bean.User" id="user3">
+        <constructor-arg name="id" value="1"></constructor-arg>
+    </bean>
+
+    <!--    复杂的依赖注入
+    depends on 先去加载
+    所有的bean默认情况下，容器创建的时候就加载了
+    遇到这种启动的时候，缺少类的情况，需要懒加载，即使用时加载
+    -->
+    <bean class="org.sean.bean.Person" id="person" depends-on="role">
+        <constructor-arg name="user" ref="user2"></constructor-arg>
+        <constructor-arg name="role" ref="role"></constructor-arg>
+        <constructor-arg name="id" value="1"></constructor-arg>
+        <property name="friends">
+            <list>
+                <value>ammy</value>
+                <value>mike</value>
+                <value>john</value>
+            </list>
+        </property>
+        <property name="hobbies">
+            <map>
+                <entry key="1" value="b-ball"></entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean class="org.sean.bean.Role" id="role"></bean>
+
+    <!--默认使用无参构造函数，自己规定了才可以用自己的  -->
+    <bean class="org.sean.bean.Role" id="role2" lazy-init="true" scope="prototype">
+        <property name="level" value="1"></property>
+        <property name="rid" value="1"></property>
+    </bean>
+
+    <!--   使用静态工厂方法来实例化bean-->
+    <bean class="org.sean.bean.Student" factory-method="createStudent" id="student"></bean>
+
+    <!--   使用实例工厂方法FactoryBean方法来实例化bean，需要指定bean-->
+    <bean class="org.sean.bean.StudentFactory" id="studentFactory"></bean>
+    <bean class="org.sean.bean.Student" factory-bean="studentFactory" factory-method="createStudent"
+          id="student2"></bean>
+    <!--   !!! 自动注入 3种方式：1byType 2byName 3constructor-->
+    <bean class="org.sean.bean.Husband" id="husband" autowire="byType"></bean>
+
+    <bean class="org.sean.bean.Wife" id="wife" autowire-candidate="false">
+        <constructor-arg name="name" value="zhangzhangjin"></constructor-arg>
+    </bean>
+
+    <bean class="org.sean.bean.Wife" id="wife2" primary="true">
+        <constructor-arg name="name" value="zhangzhangjin2"></constructor-arg>
+    </bean>
+
+    <!--   !!! 自动注入 3种方式：
+     1byType，根据类型匹配到多个，可以设置primary（根据类型）也可以autowire-candidate放弃自动注入
+     2byName（根据set方法的名字匹配）
+     3constructor（优先根据构造函数参数名字，假如名字没有匹配到，那么找类型）-->
+    <bean class="org.sean.bean.Husband" id="husband2" autowire="constructor"></bean>
+
+    <!--生命周期的回调-->
+    <!--三种方式实现生命周期回调，两种xml，一种注解-->
+    <!--    下面的调用顺序是先调接口，再调用配置中的方法-->
+    <!--    1：实现initializingBean和disposableBean-->
+    <!--    2：自定义init和destory方法-->
+    <!--    3：@PreConstruct和@DestoryConstruct-->
+    <bean class="org.sean.bean.Man" id="man" init-method="init" destroy-method="destoryByConfig"></bean>
+
+    <!--    第三方单例Bean-->
+
+    <!--    这里直接巧placeholder，idea可以直接生成上面的xml命名空间-->
+    <!--    通常会用属性文件来加载dataSource的值，这样有利于后期的修改维护-->
+    <context:property-placeholder location="db.properties"></context:property-placeholder>
+    <!--    配置第三方bean-->
+    <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource">
+        <property name="username" value="${username}"></property>
+        <property name="password" value="${password}"></property>
+        <property name="driverClassName" value="${driverClassName}"></property>
+        <property name="url" value="${url}"></property>
+    </bean>
+    <!--spel的使用:spring表达式语言-->
+    <!--    1：在代码中使用-->
+    <!--2：调用其他的bean，调用其他bean的静态方法-->
+    <bean class="org.sean.bean.SpelBean" id="spelBean">
+        <property name="mark" value="#{1+2}"></property>
+    </bean>
+</beans>
