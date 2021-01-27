@@ -8,11 +8,12 @@ public class User {
     private LocalDate birthDate;
 
     public User() {
-        System.out.println("user已加载");
+        System.out.println("user已加载，使用默认空构造函数");
     }
 
     public User(Integer id) {
         this.id = id;
+        System.out.println("user的构造方法被调用了");
     }
 
     public Integer getId() {
@@ -21,6 +22,7 @@ public class User {
 
     public void setId(Integer id) {
         this.id = id;
+        System.out.println("user的setId被调用了");
     }
 
     public String getUserName() {

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--    Controller标记在控制层-->
+    <!--    Service标记在业务逻辑层-->
+    <!--    Repository标记在数据访问层-->
+    <!--    可以进行按注解排除，因为Controller不属于Spring容器的注解，而是SpringMVC容器的注解-->
+    <!--    也可以包含扫描-->
+    <!--    另外里面有assignable，根据类的完整限定名-->
+    <!--    还有filter自定义实现，aspectj，regex 3种方式-->
+    <context:component-scan base-package="org.sean">
+<!--        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>-->
+<!--        <context:exclude-filter type="assignable" expression="org.sean.dao.SeanDao"/>-->
+    </context:component-scan>
+    <!--    依赖注入属性，也就是xml中的properties，可以用@Value,看NameValue-->
+    <context:property-placeholder location="db.properties"></context:property-placeholder>
+
+
+</beans>

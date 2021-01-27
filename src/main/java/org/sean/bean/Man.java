@@ -3,6 +3,9 @@ package org.sean.bean;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 public class Man implements InitializingBean, DisposableBean {
     private String id;
     private String name;
