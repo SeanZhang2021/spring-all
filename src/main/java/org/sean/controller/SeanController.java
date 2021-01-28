@@ -23,6 +23,7 @@ public class SeanController {
     //@Resource
 
     public void control() {
+        System.out.println("sean control!");
         common.getThis();
     }
 

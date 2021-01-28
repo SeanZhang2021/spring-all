@@ -16,14 +16,16 @@ public class SeanService implements IService, DisposableBean, InitializingBean {
      * </p>就根据字段名字匹配，名字没有匹配到才报错
      */
     @Autowired
-    /**
-     * qualifier改beanName
-     */
+    //qualifier可以用来改beanName
     //@Qualifier("seanDao")
     private Dao seanDao;
 
+    public SeanService() {
+        System.out.println("SeanService 空构造方法被调用了");
+    }
+
 //    public SeanService(SeanDao seanDao) {
-//        System.out.println("ServiceDao的有参构造方法被调用了");
+//        System.out.println("SeanService的有参构造方法被调用了");
 //        this.seanDaoI = seanDao;
 //    }
 
@@ -43,11 +45,11 @@ public class SeanService implements IService, DisposableBean, InitializingBean {
 
     @Override
     public void destroy() throws Exception {
-        System.out.println("disposeable destory");
+        System.out.println("SeanService disposeable destory");
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        System.out.println("afterPropertiesSet");
+        System.out.println("SeanService afterPropertiesSet");
     }
 }

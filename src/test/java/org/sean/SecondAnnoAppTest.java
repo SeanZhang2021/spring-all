@@ -10,7 +10,7 @@ import org.sean.service.SeanBroService;
 import org.sean.service.SeanService;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class AnnoAppTest {
+public class SecondAnnoAppTest {
     ClassPathXmlApplicationContext app;
 
     @Before

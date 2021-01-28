@@ -15,7 +15,7 @@ import java.sql.SQLException;
 /**
  * Unit test for simple App.
  */
-public class AppTest {
+public class FirstAppTest {
     ClassPathXmlApplicationContext app;
 
     @Before
