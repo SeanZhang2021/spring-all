@@ -8,8 +8,9 @@ import javax.annotation.PreDestroy;
 
 @Repository
 @Primary//设置主要的Dao，优先级会高
-public class SeanDao implements Dao{
+public class SeanDao implements Dao {
     private String dapId;
+
     @PostConstruct
     public void constructAfter() {
         System.out.println("constructAfter");
@@ -19,7 +20,8 @@ public class SeanDao implements Dao{
     public void destoryByAnno() {
         System.out.println("destoryByAnno");
     }
-    public SeanDao(){
+
+    public SeanDao() {
         System.out.println("SeanDao的空构造方法被调用了");
     }
 
