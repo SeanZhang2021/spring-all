@@ -21,7 +21,7 @@ public class AppAop {
         //jdk动态代理只能通过接口类型获取bean，Spring不会给本类创建bean，拿到的是动态代理对象bean
         ICuoService cuo = ca.getBean(ICuoService.class);
         CuoService cuo2 = ca.getBean(CuoService.class);
-        SpecialService specialService =ca.getBean(SpecialService.class);
+        SpecialService specialService = ca.getBean(SpecialService.class);
         System.out.println("cuo class:" + cuo.getClass());
         System.out.println("cuo2 class:" + cuo2.getClass());
         System.out.println("special class:" + specialService.getClass());
@@ -33,7 +33,7 @@ public class AppAop {
         }
 
         try {
-            bro.doBroServiceAndReturn("zhangzhang");
+            System.out.println("结果：" + bro.doBroServiceAndReturn("zhangzhang"));
         } catch (Exception e) {
             System.out.println("exception: " + e.getMessage());
 

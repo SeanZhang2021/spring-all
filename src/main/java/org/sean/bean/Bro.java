@@ -3,6 +3,13 @@ package org.sean.bean;
 public class Bro {
     private String name;
 
+    @Override
+    public String toString() {
+        return "Bro{" +
+                "name='" + name + '\'' +
+                '}';
+    }
+
     public Bro() {
     }
 

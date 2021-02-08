@@ -4,7 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!--    测试别名-->
+    <!--    测试别名，xml中特殊字符要用&amp来标注-->
     <alias name="user" alias="u"></alias>
     <bean class="org.sean.bean.User" id="user"></bean>
 

@@ -1,10 +1,15 @@
 package org.sean.aop;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
+import org.sean.anno.Logger;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * 此处描述一下AOP的具体含义：就是增强方法增强了哪些对象中的哪些方法，即动态代理。
@@ -13,6 +18,7 @@ import org.springframework.stereotype.Component;
  * <p>
  * 遇到Aop大家都会提一句OOP，只是字比较像而已，OOP是面向对象，在此基础上用动态代理可以面向切面，仅此而已。
  * <p>
+ * 用法：1导入aspectj的weaver的包，导入aop-spring的，2然后开启aspectj注解配置，3在切面中写切面类即可。
  * <p>
  * Aop一共有以下几个概念：
  * 切面：Aspect->这个概念代表这个切面类要对一系列方法进行增强，所以要在切面类中定义切面方法（通知，增强方法），切面类可被定义为
@@ -32,6 +38,7 @@ import org.springframework.stereotype.Component;
  * 以下属于运行时概念：
  * <p>
  * 织入：weaving->运行时对切面处理逻辑，将切面切中的被通知类的代理给创建出来。
+ * 代理类是在内存中生成的，直接到了元空间
  * <p>
  * 目标对象：targetObject->被一个或多个切面通知的对象，也就是adviced对象，它是被代理的对象。
  * <p>
@@ -41,11 +48,12 @@ import org.springframework.stereotype.Component;
 //必须将切面放到ioc容器当中
 @Component
 //启动aop
-@EnableAspectJAutoProxy(exposeProxy = true,proxyTargetClass = true)
+@EnableAspectJAutoProxy(exposeProxy = true, proxyTargetClass = true)
 public class SeanAspect {
     /**
-     * 注意此处的用法
-     * execution(<修饰符模式>？<返回类型模式><方法名模式>(<参数模式>)<异常模式>?)
+     * 注意此处的用法，下面列举一些，具体看spring-doc的aop.md
+     * 带？可不写， * 代表可以是所有， ..代表所有子孙包
+     * execution(<访问修饰符>？<返回类型*，jdk的String不用写完整限定名，自定义的得写> <包名 ..* >？<类名 *></><方法名 *> (<参数 ..>)<异常 throw?>?)
      * execution(* com.sample.service.impl..*.*(..))
      * <p>
      * example:
@@ -87,9 +95,26 @@ public class SeanAspect {
 
     ThreadLocal<Long> threadLocal = new ThreadLocal<>();
 
+    @Pointcut("execution(* org.sean.service.SeanBroService.*(..)) ")
+    public void pointcut() {
+        //相当于一个专门写切面表达式的地方
+    }
+
+    /**
+     * 使用注解做before,pointcut方法，普通表达式
+     * 这里要注意注解的生效范围：
+     *
+     * @param joinPoint
+     * @Retention(RetentionPolicy.RUNTIME) 该注解的意思是保留到什么阶段
+     * @Target 的意思是标注在什么类型的类中属性上面
+     * 只有runtime的才能在运行时生效，而我们的aop恰恰是在运行时生成的对象以及内存中的Class对象
+     * <p>
+     * 也可以将参数与注解绑定，参数不能随便绑定，要看有效情况
+     */
     //前置通知
-    @Before("execution(* org.sean.service.SeanBroService.*(..))")
-    public void before(JoinPoint joinPoint) {
+    @Before("pointcut()&& @annotation(name)")
+    public void before1(JoinPoint joinPoint, Logger name) {
+        System.out.println("Logger:name:" + name.name());
         Signature signature = joinPoint.getSignature();
         System.out.println(signature);
         System.out.println("getDeclaringType->" + signature.getDeclaringType());
@@ -98,7 +123,7 @@ public class SeanAspect {
         System.out.println("getName->" + signature.getName());
         long startTime = System.nanoTime();
         threadLocal.set(startTime);
-        System.out.println("开始计时");
+        System.out.println("开始计时,pointcut(),anno before");
     }
 
     //前置通知
@@ -116,24 +141,58 @@ public class SeanAspect {
     }
 
     //后置通知
+
+    /**
+     * 在后置通知中，如何获取返回值：
+     */
     @After("execution(* org.sean.service.SeanBroService.*(..))")
     public void after() {
-       System.out.println((System.nanoTime() - threadLocal.get()) / 1000000 + "ms");
-       threadLocal.remove();
+        System.out.println("后置通知：" + (System.nanoTime() - threadLocal.get()) / 1000000 + "ms");
+        threadLocal.remove();
     }
 
+    /**
+     * 可获取异常
+     *
+     * @param ex
+     */
     //后置异常通知
-    @AfterThrowing("execution(* org.sean.service.SeanBroService.*(..))")
-    public void afterThrowing() {
-        System.out.println("抛出了异常！");
+    @AfterThrowing(value = "execution(* org.sean.service.SeanBroService.*(..))", throwing = "ex")
+    public void afterThrowing(Exception ex) {
+        System.out.println("抛出了异常！" + ex.getMessage());
+        //这里是如何打印栈
+        StringWriter sw = new StringWriter();
+        ex.printStackTrace(new PrintWriter(sw, true));
+        System.out.println("异常栈：" + sw.getBuffer().toString());
     }
 
+    /**
+     * 可获取返回值
+     *
+     * @param result
+     */
     //后置返回
-    @AfterReturning("execution(* org.sean.service.SeanBroService.*(..))")
-    public void afterReturning() {
-        System.out.println("记录返回的对象");
+    @AfterReturning(value = "execution(* org.sean.service.SeanBroService.*(..))", returning = "result")
+    public void afterReturning(Object result) {
+        System.out.println("记录返回的对象:" + result);
     }
 
-    //环绕通知先不管
+    //环绕通知(会覆盖其他的通知)
+//    @Around("pointcut()&& @annotation(name)")
+//    public Object around(ProceedingJoinPoint proceedingJoinPoint, Logger name) {
+//        System.out.println("LoggerName:----->" + name.name());
+//        System.out.println(proceedingJoinPoint.getSignature().toString());
+//        Object proceed = null;
+//        try {
+//            System.out.println("环绕前置通知:" + proceedingJoinPoint.getSignature().getName());
+//            proceed = proceedingJoinPoint.proceed(proceedingJoinPoint.getArgs());
+//            System.out.println("环绕返回通知:" + proceed);
+//        } catch (Throwable throwable) {
+//            System.out.println("环绕异常通知:" + "异常信息是" + throwable.getMessage());
+//        } finally {
+//            System.out.println("环绕后置通知:" + name + "方法结束");
+//        }
+//        return proceed;
+//    }
 
 }
