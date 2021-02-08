@@ -9,7 +9,7 @@ public class SeanBroService implements IService {
     public SeanBroService() {
         System.out.println("SeanBroService的空构造函数被调用了");
     }
-    @Logger
+    @Logger(name="controller-test")
     public void doBroService() {
         System.out.println("SeanBroService done");
     }

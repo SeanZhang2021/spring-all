@@ -6,6 +6,10 @@ import org.sean.controller.SeanAnnoController;
 import org.sean.service.SeanBroService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * spring2.5开始可以用注解注入属性
@@ -26,11 +30,12 @@ import org.springframework.context.annotation.*;
 //3.ImportSelector的方式在BaseImportConfig里面,他可以根据类的完整限定名注册多个bean
 //4.可以实现ImportBeanDefinitionRegistrar。
 @Import({IocBaseConfig.class, ImportTest.class})
+@EnableTransactionManagement
 public class IocConfig {
     @Value("${password}")
     private String password;
 
-    //     <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource">
+//    <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource">
 //        <property name="username" value="${username}"></property>
 //        <property name="password" value="${password}"></property>
 //        <property name="driverClassName" value="${driverClassName}"></property>
@@ -50,6 +55,11 @@ public class IocConfig {
         return druidDataSource;
     }
 
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+        return new JdbcTemplate(dataSource());
+    }
+
     // <bean class="org.sean.bean.Man" id="man" init-method="init" destroy-method="destoryByConfig"></bean>
     @Bean(name = {"lifeCycleController", "seanAnnoController"}, initMethod = "initMethod", destroyMethod = "destroyMethod")
     //Component是将类交给Spring了，这个是我们自己实例化好以后直接给它对象,也就是说，自动扫描扫描的是类，spring自己去实例化
@@ -62,6 +72,17 @@ public class IocConfig {
         seanBroService.doBroService();
         System.out.println("get " + sObject());
         return new SeanAnnoController();
+    }
+
+    /**
+     * 实现接口方法，使得返回数据库事务管理器
+     */
+    @Bean(name = "transactionManager")
+    public PlatformTransactionManager annotationDrivenTransactionManager() {
+        DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
+        //设置事务管理器管理的数据源
+        transactionManager.setDataSource(dataSource());
+        return transactionManager;
     }
 
     @Bean
